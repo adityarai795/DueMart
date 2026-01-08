@@ -19,8 +19,8 @@ const transactionSchema = new mongoose.Schema(
     },
     payment_method: {
       type: String,
-      enum: ["cod", "online"],
-      default: "cod",
+      enum: ["card", "online"],
+      default: "card",
     },
     status: {
       type: String,

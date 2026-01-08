@@ -38,7 +38,7 @@ router.post("/create", async (req, res) => {
       })),
       total_price: cart.total_price,
       delivery_address,
-      payment_method: payment_method || "cod",
+      payment_method: payment_method || "card",
       status: "pending",
     });
 
@@ -57,8 +57,8 @@ router.post("/create", async (req, res) => {
       order_id: order._id,
       customer_id,
       amount: order.total_price,
-      payment_method: payment_method || "cod",
-      status: payment_method === "cod" ? "pending" : "pending",
+      payment_method: payment_method || "card",
+      status: payment_method === "card" ? "pending" : "pending",
       transaction_id: `TXN-${order._id}`,
     });
 
@@ -248,7 +248,5 @@ router.put("/cancel/:order_id", async (req, res) => {
       .json({ message: "Error cancelling order", error: error.message });
   }
 });
-
-module.exports = router;
 
 module.exports = router;

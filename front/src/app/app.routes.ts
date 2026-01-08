@@ -3,6 +3,7 @@ import { Login } from './pages/login/login';
 import { Signup } from './pages/signup/signup';
 import { ShowallProduct } from './pages/showall-product/showall-product';
 import { Home } from './pages/home/home';
+import { Shopkeeper } from './pages/shopkeeper/shopkeeper';
 import { Cart } from './pages/cart/cart';
 
 export const routes: Routes = [
@@ -28,7 +29,11 @@ export const routes: Routes = [
     component:Cart,
   },
   {
+    path: "shopkeeper",
+    component: Shopkeeper,
+  },
+  {
     path: '**',
-    redirectTo: '', // 👈 agar koi galat URL ho to home pe redirect
+    redirectTo: '',
   },
 ];
