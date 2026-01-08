@@ -1,33 +1,20 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  backend:
-    build:
-      context: ./bck
-      dockerfile: Dockerfile
-    container_name: duemart_backend
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-    volumes:
-      - ./bck:/App
-      - /App/node_modules
-    networks:
-      - duemart-network
-
   frontend:
     build:
       context: ./front
-      dockerfile: Dockerfile
     container_name: duemart_frontend
     ports:
-      - "4200:80"
+      - "4200:4200"
     depends_on:
       - backend
-    networks:
-      - duemart-network
 
-networks:
-  duemart-network:
-    driver: bridge
+  backend:
+    build:
+      context: ./bck
+    container_name: duemart_backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./bck/.env
