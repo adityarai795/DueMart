@@ -199,9 +199,9 @@ const DuemartHomePage = () => {
                 key={product.id}
                 className="bg-white rounded-2xl shadow-md p-4 w-40"
               >
-                <Text className="text-5xl text-center mb-3">
+                {/* <Text className="text-5xl text-center mb-3">
                   {product.image}
-                </Text>
+                </Text> */}
                 <Text className="font-semibold text-gray-800 text-sm mb-2">
                   {product.name}
                 </Text>
@@ -239,10 +239,10 @@ const DuemartHomePage = () => {
                   </Text>
                 </View>
               )}
-
+{/* 
               <Text className="text-5xl text-center mb-3">
                 {product.image}
-              </Text>
+              </Text> */}
               <Text className="font-semibold text-gray-800 text-sm mb-2">
                 {product.name}
               </Text>

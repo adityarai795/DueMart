@@ -18,8 +18,8 @@ const Login = () => {
   const handleLogin = async () => {
     try {
 
-      // const res = await loginService(email, password);
-      // console.log("Login successful:", res);
+      const res = await loginService(email, password);
+      console.log("Login successful:", res);
       Alert.alert("Success", "Login successful!");
       router.replace("/(tabs)");
     } catch (err) {
