@@ -33,12 +33,11 @@ export default function Index() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar barStyle="dark-content" />
-      {!token ? (
-        <Redirect href="/(auth)/login" />
-      ) : (
-        <Redirect href="/(tabs)" />
-      )}
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#2563EB" // Tailwind blue-600
+      />
+      {!token ? <Redirect href="/(auth)/login" /> : <Redirect href="/(tabs)" />}
     </SafeAreaView>
-  )
+  );
 }

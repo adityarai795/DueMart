@@ -4,11 +4,27 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 
 const Signup = () => {
   const router = useRouter();
+  const [inputData, setInputData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const handleSubmit = async () => {
+    try {
+      Alert.alert("Success", "Signup successful!");
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.error("Signup failed:", error);
+    }
+  }
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="flex-1 justify-center px-6 py-10">
@@ -26,6 +42,10 @@ const Signup = () => {
           <TextInput
             placeholder="Enter your full name"
             className="border border-gray-300 rounded-xl px-4 py-3 text-gray-800"
+            value={inputData.fullName}
+            onChangeText={(text) =>
+              setInputData((prev) => ({ ...prev, fullName: text }))
+            }
           />
         </View>
 
@@ -36,6 +56,10 @@ const Signup = () => {
             placeholder="Enter your email"
             keyboardType="email-address"
             className="border border-gray-300 rounded-xl px-4 py-3 text-gray-800"
+            value={inputData.email}
+            onChangeText={(text) =>
+              setInputData((prev) => ({ ...prev, email: text }))
+            }
           />
         </View>
 
@@ -46,6 +70,10 @@ const Signup = () => {
             placeholder="Create a password"
             secureTextEntry
             className="border border-gray-300 rounded-xl px-4 py-3 text-gray-800"
+            value={inputData.password}
+            onChangeText={(text) =>
+              setInputData((prev) => ({ ...prev, password: text }))
+            }
           />
         </View>
 
@@ -56,11 +84,15 @@ const Signup = () => {
             placeholder="Confirm your password"
             secureTextEntry
             className="border border-gray-300 rounded-xl px-4 py-3 text-gray-800"
+            value={inputData.confirmPassword}
+            onChangeText={(text) =>
+              setInputData((prev) => ({ ...prev, confirmPassword: text }))
+            }
           />
         </View>
 
         {/* Sign Up Button */}
-        <TouchableOpacity className="bg-green-600 py-4 rounded-xl mb-4">
+        <TouchableOpacity className="bg-green-600 py-4 rounded-xl mb-4" onPress={handleSubmit}>
           <Text className="text-white text-center font-semibold text-lg">
             Sign Up
           </Text>
