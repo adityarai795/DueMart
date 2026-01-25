@@ -1,15 +1,17 @@
 import api from "./api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const loginService = async (email: string, password: string) => {
   try {
     const response = await api.post(
-      "http://192.168.3.181:4000/customers/login",
+      "http://192.168.1.35:4000/customers/login",
       {
         email,
         password,
       },
     );
-    // localStorage.setItem("token", response.data.token);
+        await AsyncStorage.setItem("token", response.data.token);
+    // localStorage.setItem("token", );
     return response.data;
   } catch (error) {
     console.error("Login error 1:", error);
@@ -33,4 +35,13 @@ export const signupService = async (
     console.error("Signup error:", error);
     throw error;
   }
+};
+
+export const logoutService = async () => {
+  try {
+    await AsyncStorage.removeItem("token");
+  } catch (error) {
+    console.error("Logout error:", error);
+    throw error;
+  } 
 };

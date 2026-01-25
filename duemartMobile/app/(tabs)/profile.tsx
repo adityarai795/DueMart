@@ -1,7 +1,11 @@
+import { useRouter } from "expo-router";
+import { logoutService } from "@/src/services/authService";
 import React from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 
 const Profile = () => {
+  const router = useRouter();
+
   const user = {
     name: "John Doe",
     email: "john@example.com",
@@ -16,6 +20,16 @@ const Profile = () => {
     { id: 5, title: "Settings", icon: "⚙️" },
     { id: 6, title: "Help & Support", icon: "❓" },
   ];
+  const handleLogout = async () => {
+    try {
+      await logoutService();
+      // Optionally, navigate to login screen or show a message
+      Alert.alert("Logged out", "You have been logged out successfully.");
+      router.replace("/(auth)/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
 
   return (
     <ScrollView className="flex-1 bg-gray-100">
@@ -70,7 +84,12 @@ const Profile = () => {
         ))}
 
         {/* Logout Button */}
-        <Pressable className="bg-red-500 py-4 rounded-xl mt-4">
+        <Pressable
+          className="bg-red-500 py-4 rounded-xl mt-4"
+          onPress={() => {
+            handleLogout();
+          }}
+        >
           <Text className="text-white text-center font-semibold text-lg">
             Logout
           </Text>

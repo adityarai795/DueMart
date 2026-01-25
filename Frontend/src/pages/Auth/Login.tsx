@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import { loginService } from "../../src/services/authService";
+import { loginService } from "../../services/authService";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -10,13 +10,11 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      // const res = await loginService(email, password);
-      // console.log("Login successful:", res);
-
-      alert("Login successful!");
+      const res=await loginService(email, password);
+      console.log("Login successful:", res);
       navigate("/"); // or /dashboard
-    } catch (err) {
-      console.log("Login failed:", err);
+    } catch (err:any) {
+      console.log("Login failed:", err.message);
       alert("Login failed. Check console.");
     }
   };

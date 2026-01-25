@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import {
   ShoppingCart,
   Search,
@@ -9,17 +9,15 @@ import {
   MapPin,
   Phone,
   Mail,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
+
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [cartCount, setCartCount] = useState(3);
   return (
-    <div >
+    <div>
       <div className="bg-gray-900 text-white text-sm">
         <div className="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -46,11 +44,12 @@ function Navbar() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
+            <Link to="/">
             <div className="flex items-center">
-              <a href="#" className="text-2xl font-bold text-blue-600">
+              <Link to="/" className="text-2xl font-bold text-blue-600">
                 Due<span className="text-gray-900">Mart</span>
-              </a>
-            </div>
+              </Link>
+            </div></Link>
 
             {/* Search Bar - Desktop */}
             <div className="hidden md:flex flex-1 max-w-2xl mx-8">
@@ -81,10 +80,12 @@ function Navbar() {
                   </span>
                 )}
               </button>
-              <button className="flex items-center gap-2 hover:text-blue-600 transition">
-                <User className="w-5 h-5" />
-                <span>Account</span>
-              </button>
+              <Link to="/profile">
+                <button className="flex items-center gap-2 hover:text-blue-600 transition">
+                  <User className="w-5 h-5" />
+                  <span>Account</span>
+                </button>
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}

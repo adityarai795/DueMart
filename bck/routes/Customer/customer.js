@@ -4,6 +4,7 @@ const Customer = require("../../models/Customer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const authmiddleware = require("../../middleware/auth");
 
 // Register Customer
 route.post("/register", async (req, res) => {
@@ -169,6 +170,28 @@ route.get("/", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching customers", error: error.message });
+  }
+});
+
+route.get("/profile", authmiddleware, async (req, res) => {
+  try {
+    const customerId = req.user.customer_id;
+
+    const customer = await Customer.findById(customerId).select("-password");
+
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    res.status(200).json({
+      message: "Customer profile retrieved",
+      customer,
+    });
+  } catch (error) {
+    console.error("Get profile error:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching profile", error: error.message });
   }
 });
 

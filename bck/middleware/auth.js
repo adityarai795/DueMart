@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
 
 function authmiddleware(req, res, next) {
-  const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+  const token =
+    req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
     return res
@@ -15,8 +16,6 @@ function authmiddleware(req, res, next) {
     }
 
     req.user = decoded;
-    console.log("✅ Token verified:", decoded);
-
     next();
   });
 }
