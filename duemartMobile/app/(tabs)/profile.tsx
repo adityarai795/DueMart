@@ -4,6 +4,7 @@ import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { getProfileService } from "@/src/services/profile";
 import { logoutService } from "@/src/redux/actions/authAction";
 import { useAppDispatch, useAppSelector } from "@/src/redux/hooks";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 interface User {
   name: string;
   email: string;
@@ -23,7 +24,8 @@ const Profile = () => {
   ];
   const handleLogout = async () => {
     try {
-      await dispatch(logoutService());
+await dispatch(logoutService()).unwrap();
+         await AsyncStorage.removeItem("token");
       Alert.alert("Logged out", "You have been logged out successfully.");
       router.replace("/(auth)/login");
     } catch (error) {

@@ -47,12 +47,12 @@ export const signupService = createAsyncThunk<
 >("auth/signup", async ({ name, email, password }, { rejectWithValue }) => {
   try {
     const response = await api.post("/customers/register", {
-         name,
-         email,
-         password,
-         address: "123 Main St, City",
-         mobileno: "9876543210",
-       });
+      name,
+      email,
+      password,
+      address: "123 Main St, City",
+      mobileno: "9876543210",
+    });
     return {
       user: response.data.user,
       token: response.data.token,
@@ -67,6 +67,8 @@ export const logoutService = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await AsyncStorage.removeItem("token");
+      delete api.defaults.headers.common["Authorization"];
+
       return true;
     } catch (error) {
       return rejectWithValue("Logout failed");

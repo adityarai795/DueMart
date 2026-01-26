@@ -21,11 +21,15 @@ api.interceptors.request.use(
     if (token) {
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      // 🔥 This prevents ghost token
+      delete config.headers?.Authorization;
     }
 
     return config;
   },
   (error) => Promise.reject(error),
 );
+
 
 export default api;

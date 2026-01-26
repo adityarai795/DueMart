@@ -6,6 +6,8 @@ import {
   ScrollView,
   Pressable,
   StatusBar,
+  Touchable,
+  TouchableOpacity,
 } from "react-native";
 
 const DuemartHomePage = () => {
@@ -150,9 +152,7 @@ const DuemartHomePage = () => {
 
       {/* Categories */}
       <View className="px-6 py-6">
-        <Text className="text-xl font-bold text-gray-800 mb-4">
-          Categories
-        </Text>
+        <Text className="text-xl font-bold text-gray-800 mb-4">Categories</Text>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View className="flex-row gap-3">
@@ -161,9 +161,7 @@ const DuemartHomePage = () => {
                 key={category.id}
                 onPress={() => setActiveCategory(category.id)}
                 className={`px-6 py-4 rounded-2xl ${
-                  activeCategory === category.id
-                    ? "bg-blue-600"
-                    : "bg-white"
+                  activeCategory === category.id ? "bg-blue-600" : "bg-white"
                 }`}
               >
                 <Text
@@ -187,34 +185,32 @@ const DuemartHomePage = () => {
           <Text className="text-xl font-bold text-gray-800">
             Popular Products
           </Text>
-          <Text className="text-blue-600 font-medium">
-            See All
-          </Text>
+          <Text className="text-blue-600 font-medium">See All</Text>
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View className="flex-row gap-4">
             {popularProducts.map((product) => (
-              <View
-                key={product.id}
-                className="bg-white rounded-2xl shadow-md p-4 w-40"
-              >
-                {/* <Text className="text-5xl text-center mb-3">
+                <View
+                  key={product.id}
+                  className="bg-white rounded-2xl shadow-md p-4 w-40"
+                >
+                  {/* <Text className="text-5xl text-center mb-3">
                   {product.image}
                 </Text> */}
-                <Text className="font-semibold text-gray-800 text-sm mb-2">
-                  {product.name}
-                </Text>
-                <Text className="text-xs text-gray-600 mb-1">
-                  ⭐ {product.rating}
-                </Text>
-                <Text className="text-blue-600 font-bold text-lg">
-                  ${product.price}
-                </Text>
-                <Text className="text-xs text-gray-500 mt-1">
-                  {product.sales} sold
-                </Text>
-              </View>
+                  <Text className="font-semibold text-gray-800 text-sm mb-2">
+                    {product.name}
+                  </Text>
+                  <Text className="text-xs text-gray-600 mb-1">
+                    ⭐ {product.rating}
+                  </Text>
+                  <Text className="text-blue-600 font-bold text-lg">
+                    ${product.price}
+                  </Text>
+                  <Text className="text-xs text-gray-500 mt-1">
+                    {product.sales} sold
+                  </Text>
+                </View>
             ))}
           </View>
         </ScrollView>
@@ -239,7 +235,7 @@ const DuemartHomePage = () => {
                   </Text>
                 </View>
               )}
-{/* 
+              {/* 
               <Text className="text-5xl text-center mb-3">
                 {product.image}
               </Text> */}
