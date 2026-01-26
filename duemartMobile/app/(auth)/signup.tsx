@@ -8,8 +8,12 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { signupService } from "@/src/redux/actions/authAction";
+import { useAppDispatch, useAppSelector } from "@/src/redux/hooks";
+import { api } from "@/src/services/api";
 
 const Signup = () => {
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const [inputData, setInputData] = useState({
     fullName: "",
@@ -19,12 +23,19 @@ const Signup = () => {
   });
   const handleSubmit = async () => {
     try {
+       const result = await dispatch(
+          signupService({
+            name: inputData.fullName,
+            email: inputData.email,
+            password: inputData.password,
+          }),
+        );
       Alert.alert("Success", "Signup successful!");
-      router.replace("/(tabs)");
+      router.push("/login");
     } catch (error) {
       console.error("Signup failed:", error);
     }
-  }
+  };
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="flex-1 justify-center px-6 py-10">
@@ -92,7 +103,10 @@ const Signup = () => {
         </View>
 
         {/* Sign Up Button */}
-        <TouchableOpacity className="bg-green-600 py-4 rounded-xl mb-4" onPress={handleSubmit}>
+        <TouchableOpacity
+          className="bg-green-600 py-4 rounded-xl mb-4"
+          onPress={handleSubmit}
+        >
           <Text className="text-white text-center font-semibold text-lg">
             Sign Up
           </Text>

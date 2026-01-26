@@ -1,17 +1,18 @@
 import { useRouter } from "expo-router";
-import { logoutService } from "@/src/services/authService";
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
-
+import { getProfileService } from "@/src/services/profile";
+import { logoutService } from "@/src/redux/actions/authAction";
+import { useAppDispatch, useAppSelector } from "@/src/redux/hooks";
+interface User {
+  name: string;
+  email: string;
+  mobileno: string;
+}
 const Profile = () => {
+  const dispatch = useAppDispatch();
   const router = useRouter();
-
-  const user = {
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+91 98765 43210",
-  };
-
+  const [user, setUser] = React.useState<User>();
   const menuItems = [
     { id: 1, title: "My Orders", icon: "📦" },
     { id: 2, title: "Wishlist", icon: "❤️" },
@@ -22,14 +23,28 @@ const Profile = () => {
   ];
   const handleLogout = async () => {
     try {
-      await logoutService();
-      // Optionally, navigate to login screen or show a message
+      await dispatch(logoutService());
       Alert.alert("Logged out", "You have been logged out successfully.");
       router.replace("/(auth)/login");
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
+
+  const fetchProfile = async () => { 
+    try {
+      console.log("Fetching profile...");
+      const response = await getProfileService();
+      console.log("Profile data:", response.customer);
+      setUser(response.customer);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchProfile();
+  },[])
 
   return (
     <ScrollView className="flex-1 bg-gray-100">
@@ -41,8 +56,10 @@ const Profile = () => {
             <Text className="text-4xl">👤</Text>
           </View>
 
-          <Text className="text-xl font-bold text-white">{user.name}</Text>
-          <Text className="text-blue-100 mt-1">{user.email}</Text>
+          <Text className="text-xl font-bold text-white">
+            {user?.name || ""}
+          </Text>
+          <Text className="text-blue-100 mt-1">{user?.email || ""}</Text>
         </View>
       </View>
 
@@ -53,17 +70,23 @@ const Profile = () => {
 
           <View className="flex-row justify-between mb-3">
             <Text className="text-gray-500">Name</Text>
-            <Text className="text-gray-800 font-medium">{user.name}</Text>
+            <Text className="text-gray-800 font-medium">
+              {user?.name || ""}
+            </Text>
           </View>
 
           <View className="flex-row justify-between mb-3">
             <Text className="text-gray-500">Email</Text>
-            <Text className="text-gray-800 font-medium">{user.email}</Text>
+            <Text className="text-gray-800 font-medium">
+              {user?.email || ""}
+            </Text>
           </View>
 
           <View className="flex-row justify-between">
             <Text className="text-gray-500">Phone</Text>
-            <Text className="text-gray-800 font-medium">{user.phone}</Text>
+            <Text className="text-gray-800 font-medium">
+              {user?.mobileno || ""}
+            </Text>
           </View>
         </View>
       </View>

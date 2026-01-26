@@ -7,18 +7,20 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { loginService } from "../../src/services/authService";
 import { useState } from "react";
+import { loginService } from "@/src/redux/actions/authAction";
+import { useAppDispatch, useAppSelector } from "@/src/redux/hooks";
 
 const Login = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const [email, setEmail] = useState("john@example.com");
   const [password, setPassword] = useState("password123");
   const handleLogin = async () => {
     try {
-
-      const res = await loginService(email, password);
+      // const res = await loginService(email, password);
+      const res = dispatch(loginService({ email, password }));
       console.log("Login successful:", res);
       Alert.alert("Success", "Login successful!");
       router.replace("/(tabs)");
