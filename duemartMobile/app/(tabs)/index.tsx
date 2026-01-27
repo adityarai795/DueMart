@@ -9,11 +9,13 @@ import {
   Touchable,
   TouchableOpacity,
 } from "react-native";
+import { useNavigation } from "expo-router";
+import { router } from "expo-router";
 
 const DuemartHomePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
-
+  const navigation = useNavigation();
   const categories = [
     { id: "all", name: "All" },
     { id: "electronics", name: "Electronics" },
@@ -191,26 +193,24 @@ const DuemartHomePage = () => {
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View className="flex-row gap-4">
             {popularProducts.map((product) => (
-                <View
-                  key={product.id}
-                  className="bg-white rounded-2xl shadow-md p-4 w-40"
-                >
-                  {/* <Text className="text-5xl text-center mb-3">
-                  {product.image}
-                </Text> */}
-                  <Text className="font-semibold text-gray-800 text-sm mb-2">
-                    {product.name}
-                  </Text>
-                  <Text className="text-xs text-gray-600 mb-1">
-                    ⭐ {product.rating}
-                  </Text>
-                  <Text className="text-blue-600 font-bold text-lg">
-                    ${product.price}
-                  </Text>
-                  <Text className="text-xs text-gray-500 mt-1">
-                    {product.sales} sold
-                  </Text>
-                </View>
+              <Pressable
+                key={product.id}
+                onPress={() => router.push(`/product/${product.id}`)}
+                className="bg-white rounded-2xl shadow-md p-4 w-40"
+              >
+                <Text className="font-semibold text-gray-800 text-sm mb-2">
+                  {product.name}
+                </Text>
+                <Text className="text-xs text-gray-600 mb-1">
+                  ⭐ {product.rating}
+                </Text>
+                <Text className="text-blue-600 font-bold text-lg">
+                  ${product.price}
+                </Text>
+                <Text className="text-xs text-gray-500 mt-1">
+                  {product.sales} sold
+                </Text>
+              </Pressable>
             ))}
           </View>
         </ScrollView>
@@ -224,10 +224,10 @@ const DuemartHomePage = () => {
 
         <View className="flex-row flex-wrap justify-between">
           {products.map((product) => (
-            <View
+            <Pressable
               key={product.id}
               className="bg-white rounded-2xl shadow-md p-4 mb-4 w-[48%]"
-            >
+              onPress={() => router.push(`/product/${product.id}`)}>
               {product.discount > 0 && (
                 <View className="bg-red-500 self-start px-2 py-1 rounded-lg mb-2">
                   <Text className="text-white text-xs font-bold">
@@ -254,7 +254,7 @@ const DuemartHomePage = () => {
                   <Text className="text-white">🛒</Text>
                 </Pressable>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </View>
