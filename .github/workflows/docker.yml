@@ -23,11 +23,7 @@ jobs:
             cd DueMart
             git pull origin main
 
-            cd bck/backend
-
-            docker stop backend || true
-            docker rm backend || true
-
+            cd bck
             docker build -t backend .
             
             docker run -d \
