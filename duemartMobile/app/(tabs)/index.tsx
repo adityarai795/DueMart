@@ -1,147 +1,92 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TextInput,
   ScrollView,
   Pressable,
-  StatusBar,
-  Touchable,
-  TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import { useNavigation } from "expo-router";
 import { router } from "expo-router";
+
+const API_URL = "http://192.168.1.35:4000/products";
 
 const DuemartHomePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
-  const navigation = useNavigation();
+
+  const [products, setProducts] = useState([]); // BACKEND PRODUCTS
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const categories = [
     { id: "all", name: "All" },
     { id: "electronics", name: "Electronics" },
-    { id: "fashion", name: "Fashion" },
-    { id: "home", name: "Home" },
+    { id: "clothing", name: "Clothing" },
+    { id: "books", name: "Books" },
+    { id: "home & kitchen", name: "Home & Kitchen" },
+    { id: "sports", name: "Sports" },
+    { id: "accessories", name: "Accessories" },
+    { id: "other", name: "Other" },
   ];
 
-  const popularProducts = [
-    {
-      id: 1,
-      name: "Wireless Earbuds Pro",
-      price: 89.99,
-      image: "🎧",
-      rating: 4.8,
-      sales: 1234,
-    },
-    {
-      id: 2,
-      name: "Smart Watch Ultra",
-      price: 299.99,
-      image: "⌚",
-      rating: 4.9,
-      sales: 890,
-    },
-    {
-      id: 3,
-      name: "Premium Sneakers",
-      price: 129.99,
-      image: "👟",
-      rating: 4.7,
-      sales: 2100,
-    },
-    {
-      id: 4,
-      name: "Coffee Maker Deluxe",
-      price: 149.99,
-      image: "☕",
-      rating: 4.6,
-      sales: 567,
-    },
-  ];
+  // 🔥 FETCH FROM BACKEND
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(API_URL);
 
-  const products = [
-    {
-      id: 5,
-      name: "Laptop Stand",
-      price: 49.99,
-      image: "💻",
-      rating: 4.5,
-      discount: 15,
-    },
-    {
-      id: 6,
-      name: "Yoga Mat Premium",
-      price: 39.99,
-      image: "🧘",
-      rating: 4.7,
-      discount: 0,
-    },
-    {
-      id: 7,
-      name: "Desk Lamp LED",
-      price: 34.99,
-      image: "💡",
-      rating: 4.4,
-      discount: 20,
-    },
-    {
-      id: 8,
-      name: "Water Bottle",
-      price: 24.99,
-      image: "🥤",
-      rating: 4.6,
-      discount: 0,
-    },
-    {
-      id: 9,
-      name: "Backpack Pro",
-      price: 79.99,
-      image: "🎒",
-      rating: 4.8,
-      discount: 10,
-    },
-    {
-      id: 10,
-      name: "Phone Case",
-      price: 19.99,
-      image: "📱",
-      rating: 4.3,
-      discount: 0,
-    },
-  ];
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const data = await response.json();
+      console.log("Backend Data:", data);
+
+      // Backend returns { message, count, products }
+      setProducts(data.products || []);
+      setError("");
+    } catch (err) {
+      console.error("Fetch Error:", err);
+      setError("Unable to load products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // 🔎 SEARCH + CATEGORY FILTER
+  const filteredProducts = products.filter((product:any) => {
+    const matchesSearch = product.product_name
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    const matchesCategory =
+      activeCategory === "all" ||
+      product.category?.toLowerCase() === activeCategory.toLowerCase();
+
+    return matchesSearch && matchesCategory;
+  });
 
   return (
-    <ScrollView className="flex-1 bg-gray-50 ">
-      {/* Header */}
-      <View className="bg-blue-600 rounded-b-3xl px-6 pt-8 pb-10 shadow-lg ">
+    <ScrollView className="flex-1 bg-gray-50">
+      {/* HEADER */}
+      <View className="bg-blue-600 rounded-b-3xl px-6 pt-8 pb-10 shadow-lg">
         <View className="flex-row justify-between items-center mb-6">
           <View>
             <Text className="text-3xl font-bold text-white">
-              {/* <Text>Due</Text> */}
               Due<Text className="text-black/50">Mart</Text>
             </Text>
             <Text className="text-blue-100 text-sm mt-1">
               Your Shopping Paradise
             </Text>
           </View>
-
-          <View className="flex-row gap-3">
-            <Pressable className="relative bg-white/20 p-3 rounded-full">
-              <Text className="text-white text-lg">❤️</Text>
-              <View className="absolute -top-1 -right-1 bg-red-500 w-5 h-5 rounded-full items-center justify-center">
-                <Text className="text-white text-xs">3</Text>
-              </View>
-            </Pressable>
-
-            <Pressable className="relative bg-white/20 p-3 rounded-full">
-              <Text className="text-white text-lg">🛒</Text>
-              <View className="absolute -top-1 -right-1 bg-red-500 w-5 h-5 rounded-full items-center justify-center">
-                <Text className="text-white text-xs">5</Text>
-              </View>
-            </Pressable>
-          </View>
         </View>
 
-        {/* Search */}
+        {/* SEARCH */}
         <View className="bg-white rounded-2xl px-4 py-3 shadow-md">
           <TextInput
             placeholder="Search products..."
@@ -152,7 +97,7 @@ const DuemartHomePage = () => {
         </View>
       </View>
 
-      {/* Categories */}
+      {/* CATEGORIES */}
       <View className="px-6 py-6">
         <Text className="text-xl font-bold text-gray-800 mb-4">Categories</Text>
 
@@ -162,12 +107,12 @@ const DuemartHomePage = () => {
               <Pressable
                 key={category.id}
                 onPress={() => setActiveCategory(category.id)}
-                className={`px-6 py-4 rounded-2xl ${
+                className={`px-5 py-3 rounded-2xl ${
                   activeCategory === category.id ? "bg-blue-600" : "bg-white"
                 }`}
               >
                 <Text
-                  className={`text-sm font-medium ${
+                  className={`text-sm font-semibold ${
                     activeCategory === category.id
                       ? "text-white"
                       : "text-gray-700"
@@ -181,81 +126,113 @@ const DuemartHomePage = () => {
         </ScrollView>
       </View>
 
-      {/* Popular Products */}
-      <View className="px-6 py-4">
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-xl font-bold text-gray-800">
-            Popular Products
-          </Text>
-          <Text className="text-blue-600 font-medium">See All</Text>
-        </View>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View className="flex-row gap-4">
-            {popularProducts.map((product) => (
-              <Pressable
-                key={product.id}
-                onPress={() => router.push(`/product/${product.id}`)}
-                className="bg-white rounded-2xl shadow-md p-4 w-40"
-              >
-                <Text className="font-semibold text-gray-800 text-sm mb-2">
-                  {product.name}
-                </Text>
-                <Text className="text-xs text-gray-600 mb-1">
-                  ⭐ {product.rating}
-                </Text>
-                <Text className="text-blue-600 font-bold text-lg">
-                  ${product.price}
-                </Text>
-                <Text className="text-xs text-gray-500 mt-1">
-                  {product.sales} sold
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
-
-      {/* All Products */}
+      {/* PRODUCTS */}
       <View className="px-6 py-4 pb-10">
         <Text className="text-xl font-bold text-gray-800 mb-4">
           All Products
         </Text>
 
-        <View className="flex-row flex-wrap justify-between">
-          {products.map((product) => (
-            <Pressable
-              key={product.id}
-              className="bg-white rounded-2xl shadow-md p-4 mb-4 w-[48%]"
-              onPress={() => router.push(`/product/${product.id}`)}>
-              {product.discount > 0 && (
-                <View className="bg-red-500 self-start px-2 py-1 rounded-lg mb-2">
-                  <Text className="text-white text-xs font-bold">
-                    -{product.discount}%
-                  </Text>
-                </View>
-              )}
-              {/* 
-              <Text className="text-5xl text-center mb-3">
-                {product.image}
-              </Text> */}
-              <Text className="font-semibold text-gray-800 text-sm mb-2">
-                {product.name}
-              </Text>
-              <Text className="text-xs text-gray-600 mb-2">
-                ⭐ {product.rating}
-              </Text>
+        {/* LOADING */}
+        {loading && <ActivityIndicator size="large" color="#2563EB" />}
 
-              <View className="flex-row justify-between items-center">
-                <Text className="text-blue-600 font-bold">
-                  ${product.price}
-                </Text>
-                <Pressable className="bg-blue-600 p-2 rounded-lg">
-                  <Text className="text-white">🛒</Text>
-                </Pressable>
-              </View>
-            </Pressable>
-          ))}
+        {/* ERROR */}
+        {error !== "" && (
+          <Text className="text-red-500 text-center mt-4">{error}</Text>
+        )}
+
+        {/* PRODUCTS GRID */}
+        <View className="flex-row flex-wrap justify-between">
+          {filteredProducts.map((product:any) => {
+            const inStock = product.product_quantity > 0;
+            const lowStock =
+              product.product_quantity > 0 && product.product_quantity < 5;
+
+            return (
+              <Pressable
+                key={product._id}
+                className="bg-white rounded-3xl shadow-lg mb-5 w-[48%] overflow-hidden"
+                onPress={() => router.push(`/product/${product._id}`)}
+              >
+                {/* IMAGE PLACEHOLDER */}
+                <View className="relative">
+                  <Text className="text-center text-7xl py-6 bg-gray-100">
+                    🖼️
+                  </Text>
+
+                  {/* CATEGORY BADGE */}
+                  <View className="absolute top-2 left-2 bg-blue-600 px-3 py-1 rounded-full">
+                    <Text className="text-white text-xs font-bold">
+                      {product.category}
+                    </Text>
+                  </View>
+
+                  {/* STOCK BADGE */}
+                  {lowStock && (
+                    <View className="absolute top-2 right-2 bg-red-500 px-3 py-1 rounded-full">
+                      <Text className="text-white text-xs font-bold">
+                        Low Stock
+                      </Text>
+                    </View>
+                  )}
+
+                  {!inStock && (
+                    <View className="absolute top-2 right-2 bg-gray-700 px-3 py-1 rounded-full">
+                      <Text className="text-white text-xs font-bold">
+                        Out of Stock
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* CONTENT */}
+                <View className="p-4">
+                  {/* NAME */}
+                  <Text
+                    className="font-bold text-gray-800 text-sm mb-1"
+                    numberOfLines={2}
+                  >
+                    {product.product_name}
+                  </Text>
+
+                  {/* DESCRIPTION */}
+                  <Text
+                    className="text-gray-500 text-xs mb-2"
+                    numberOfLines={2}
+                  >
+                    {product.product_description || "No description available"}
+                  </Text>
+
+                  {/* RATING */}
+                  <View className="flex-row items-center mb-2">
+                    <Text className="text-yellow-500 text-xs">
+                      ⭐ {product.rating || 0}
+                    </Text>
+                    <Text className="text-gray-400 text-xs ml-1">
+                      ({product.reviews || 0})
+                    </Text>
+                  </View>
+
+                  {/* PRICE + BUTTON */}
+                  <View className="flex-row justify-between items-center">
+                    <Text className="text-blue-600 font-bold text-base">
+                      ₹{product.product_price}
+                    </Text>
+
+                    <Pressable
+                      disabled={!inStock}
+                      className={`px-3 py-2 rounded-xl ${
+                        inStock ? "bg-blue-600" : "bg-gray-400"
+                      }`}
+                    >
+                      <Text className="text-white text-xs font-bold">
+                        {inStock ? "Add" : "N/A"}
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </Pressable>
+            );
+          })}
         </View>
       </View>
     </ScrollView>
