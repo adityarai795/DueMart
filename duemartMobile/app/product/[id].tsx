@@ -10,8 +10,8 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAppDispatch } from "@/src/redux/hooks";
-import { addToCart } from "@/src/redux/reducers/cartReducers";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { addToCartService } from "@/src/redux/actions/cartAction";
 
 // 🌐 API
 const API_BASE = "http://192.168.1.35:4000/products";
@@ -41,7 +41,12 @@ interface ProductResponse {
   message?: string;
   product: Product;
 }
-
+ interface CartItem {
+   id: string; // Mongo _id = string
+   name: string;
+   price: number;
+   quantity: number;
+ }
 const ProductPage: React.FC = () => {
   const params = useLocalSearchParams<{ id?: string }>();
   const id = params.id;
@@ -78,11 +83,14 @@ const ProductPage: React.FC = () => {
       setLoading(false);
     }
   };
+  
+  const addcartProductToCart = (product: CartItem) => {
+    dispatch(addToCartService(product));
+  };
 
   useEffect(() => {
     fetchProductById();
-  }, [id]);
-
+  }, []);
   // 🌀 LOADING STATE
   if (loading) {
     return (
@@ -217,18 +225,15 @@ const ProductPage: React.FC = () => {
           <Pressable
             disabled={!inStock}
             onPress={() => {
-              Alert.alert("Card added", "Product added to cart successfully");
+              Alert.alert("Cart added", "Product added to cart successfully");
+
+              addcartProductToCart({
+                id: product._id, // string matches CartItem
+                name: product.product_name,
+                price: product.product_price,
+                quantity: 1,
+              });
             }}
-            // onPress={() => {
-            //   dispatch(
-            //     addToCart({
-            //       id: product._id,
-            //       name: product.product_name,
-            //       price: product.product_price,
-            //       image: product.image_url || DUMMY_IMAGE,
-            //     }),
-            //   );
-            // }}
             className={`px-6 py-4 rounded-2xl ${
               inStock ? "bg-blue-600" : "bg-gray-400"
             }`}

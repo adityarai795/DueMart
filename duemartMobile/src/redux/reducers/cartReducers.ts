@@ -1,26 +1,58 @@
 import { createSlice } from "@reduxjs/toolkit";
+ interface CartItem {
+   id: string; // Mongo _id = string
+   name: string;
+   price: number;
+   quantity: number;
+}
+import {
+  addToCartService,
+  removeFromCartService,
+  clearCartService,
+} from "../actions/cartAction";
 
-const initialState = {
+interface CartState {
+  items: CartItem[];
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: CartState = {
   items: [],
+  loading: false,
+  error: null,
 };
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
-  reducers: {
-    addToCart: (state, action:any) => {
-      state.items.push(action.payload);
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
 
-    removeFromCart: (state, action) => {
-      state.items = state.items.filter((item) => item.id !== action.payload.id);
-    },
+      // ADD
+      .addCase(addToCartService.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(addToCartService.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items.push(action.payload);
+      })
+      .addCase(addToCartService.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Add to cart failed";
+      })
 
-    clearCart: (state) => {
-      state.items = [];
-    },
+      // REMOVE
+      .addCase(removeFromCartService.fulfilled, (state, action) => {
+        state.items = state.items.filter((item) => item.id !== action.payload);
+      })
+
+      // CLEAR
+      .addCase(clearCartService.fulfilled, (state) => {
+        state.items = [];
+      });
   },
 });
 
-export const { addToCart, removeFromCart, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
