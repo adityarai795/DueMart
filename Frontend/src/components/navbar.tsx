@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import  { useEffect, useState } from "react";
 import {
   ShoppingCart,
   Search,
@@ -15,7 +15,15 @@ import { Link } from "react-router-dom";
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [cartCount, setCartCount] = useState(3);
+  const [cartCount, setCartCount] = useState(3);
+  function toggleMenu() {
+    console.log("Toggling menu");
+    setCartCount(5);
+    setIsMenuOpen(!isMenuOpen); 
+  }
+  useEffect(() => {
+    toggleMenu();
+  },[isMenuOpen]);
   return (
     <div>
       <div className="bg-gray-900 text-white text-sm">

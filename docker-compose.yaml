@@ -1,0 +1,20 @@
+
+services:
+  frontend:
+    container_name: duemart-frontend
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    restart: always
+  
+  backend:
+    container_name: duemart-backend
+    build:
+      context: ./bck
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    restart: always
+    
