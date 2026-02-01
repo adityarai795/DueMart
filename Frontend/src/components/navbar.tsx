@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ShoppingCart,
   Search,
@@ -9,21 +9,21 @@ import {
   MapPin,
   Phone,
   Mail,
-
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCart } from "../context/cartContext";
 
 function Navbar() {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(3);
-  function toggleMenu() {
-    console.log("Toggling menu");
-    setCartCount(5);
-    setIsMenuOpen(!isMenuOpen); 
-  }
-  useEffect(() => {
-    toggleMenu();
-  },[isMenuOpen]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { cartItems } = useCart();
+
+  // function toggleMenu() {
+  //   console.log("Toggling menu");
+  //   setIsMenuOpen(!isMenuOpen);
+  // }
+  // useEffect(() => {
+  //   toggleMenu();
+  // }, [isMenuOpen]);
   return (
     <div>
       <div className="bg-gray-900 text-white text-sm">
@@ -53,11 +53,12 @@ function Navbar() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/">
-            <div className="flex items-center">
-              <Link to="/" className="text-2xl font-bold text-blue-600">
-                Due<span className="text-gray-900">Mart</span>
-              </Link>
-            </div></Link>
+              <div className="flex items-center">
+                <Link to="/" className="text-2xl font-bold text-blue-600">
+                  Due<span className="text-gray-900">Mart</span>
+                </Link>
+              </div>
+            </Link>
 
             {/* Search Bar - Desktop */}
             <div className="hidden md:flex flex-1 max-w-2xl mx-8">
@@ -79,15 +80,17 @@ function Navbar() {
                 <Heart className="w-5 h-5" />
                 <span>Wishlist</span>
               </button>
-              <button className="flex items-center gap-2 hover:text-blue-600 transition relative">
-                <ShoppingCart className="w-5 h-5" />
-                <span>Cart</span>
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
+              <Link to="/order">
+                <button className="flex items-center gap-2 hover:text-blue-600 transition relative">
+                  <ShoppingCart className="w-5 h-5" />
+                  <span>Cart</span>
+                  {cartItems.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {cartItems.length}
+                    </span>
+                  )}
+                </button>
+              </Link>
               <Link to="/profile">
                 <button className="flex items-center gap-2 hover:text-blue-600 transition">
                   <User className="w-5 h-5" />
@@ -171,7 +174,7 @@ function Navbar() {
                     <Heart className="w-5 h-5" /> Wishlist
                   </a>
                   <a href="#" className="flex items-center gap-2 py-2">
-                    <ShoppingCart className="w-5 h-5" /> Cart ({cartCount})
+                    <ShoppingCart className="w-5 h-5" /> Cart 
                   </a>
                   <a href="#" className="flex items-center gap-2 py-2">
                     <User className="w-5 h-5" /> Account

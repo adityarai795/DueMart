@@ -8,7 +8,7 @@ const authMiddleware = require("../../middleware/auth.js");
 // Add Product (by Shopkeeper)
 router.post("/add", authMiddleware, addProduct);
 
-// Get All Products
+// Get All Productsa
 router.get("/", async (req, res) => {
   try {
     const products = await Product.find().populate(

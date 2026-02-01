@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import {
   ShoppingCart,
   ArrowRight,
@@ -12,9 +12,12 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import ProductCard from "../../components/ProductCard";
+import { useCart } from "../../context/cartContext";
 
 function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { cartItems } = useCart();
 
   const heroSlides = [
     {
@@ -279,54 +282,28 @@ function Home() {
       <section className="container mx-auto px-6 py-16 bg-white">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800">
-            Featured Products
+            Featured Products{" "}
+            {cartItems.length > 0 && (
+              <span className="text-sm text-blue-600">
+                ({cartItems.length} in cart)
+              </span>
+            )}
           </h2>
           <button className="text-blue-600 font-semibold hover:text-blue-700 flex items-center gap-2">
             View All <ArrowRight className="w-5 h-5" />
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Using ProductCard Component - integrates with cart context */}
           {featuredProducts.map((product) => (
-            <div
+            <ProductCard
               key={product.id}
-              className="bg-gray-50 rounded-2xl overflow-hidden hover:shadow-xl transition group"
-            >
-              <div className="relative">
-                <div className="bg-linear-to-br from-gray-100 to-gray-200 h-64 flex items-center justify-center text-7xl">
-                  {product.image}
-                </div>
-                <span className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                  {product.badge}
-                </span>
-                <button className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition">
-                  <ShoppingCart className="w-5 h-5 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-5">
-                <h3 className="font-semibold text-gray-800 mb-2 line-clamp-1">
-                  {product.name}
-                </h3>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium text-gray-700">
-                      {product.rating}
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    ({product.reviews} reviews)
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <p className="text-2xl font-bold text-blue-600">
-                    ${product.price}
-                  </p>
-                  <p className="text-sm text-gray-400 line-through">
-                    ${product.oldPrice}
-                  </p>
-                </div>
-              </div>
-            </div>
+              id={product.id.toString()}
+              name={product.name}
+              price={product.price}
+              image={product.image}
+              description={product.name}
+            />
           ))}
         </div>
       </section>
