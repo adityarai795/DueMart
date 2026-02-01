@@ -35,7 +35,7 @@ app.use("/transactions", TransactionRoute);
 
 // Health Check
 app.get("/", async (req, res) => {
-  res.send(" DueMart Backend API is running!");
+  res.send(" DueMart Backend API is running! nice");
 });
 app.get("/health", async (req, res) => {
   res.status(200).json({ status: "OK", message: "Server is healthy" });
