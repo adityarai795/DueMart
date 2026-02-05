@@ -1,8 +1,8 @@
+// models/Order.js
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    _id: mongoose.Schema.Types.ObjectId,
     customer_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
@@ -11,50 +11,28 @@ const orderSchema = new mongoose.Schema(
     items: [
       {
         product_id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-          required: true,
+        type:String,
         },
-        quantity: {
-          type: Number,
-          required: true,
-          min: 1,
-        },
-        price: {
-          type: Number,
-          required: true,
-        },
+        name: String,
+        quantity: { type: Number, required: true },
+        price: { type: Number, required: true },
       },
     ],
-    total_price: {
-      type: Number,
-      required: true,
-    },
+    total_price: { type: Number, required: true },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+      enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
     },
-    delivery_address: {
-      type: String,
-      default: "",
-    },
-    payment_method: {
-      type: String,
-      enum: ["card", "online"],
-      default: "card",
-    },
+    delivery_address: { type: String, required: true },
+    payment_method: { type: String, default: "razorpay" },
     payment_status: {
       type: String,
       enum: ["pending", "completed", "failed"],
       default: "pending",
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Order", orderSchema);

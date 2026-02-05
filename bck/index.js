@@ -9,7 +9,7 @@ const CustomerRoute = require("./routes/Customer/customer.js");
 const ProductRoute = require("./routes/Product/product.js");
 const ShopkeeperRoute = require("./routes/Shopkeeper/shopkeeper.js");
 const OrderRoute = require("./routes/Order/order.js");
-const CartRoute = require("./routes/Cart/cart.js");
+// const CartRoute = require("./routes/Cart/cart.js");
 const TransactionRoute = require("./routes/Transaction/transaction.js");
 
 dotenv.config();
@@ -29,7 +29,7 @@ connectDB();
 app.use("/customers", CustomerRoute);
 app.use("/shopkeepers", ShopkeeperRoute);
 app.use("/products", ProductRoute);
-app.use("/cart", CartRoute);
+// app.use("/cart", CartRoute);
 app.use("/orders", OrderRoute);
 app.use("/transactions", TransactionRoute);
 

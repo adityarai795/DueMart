@@ -1,218 +1,123 @@
 const express = require("express");
 const router = express.Router();
 const Order = require("../../models/Order");
-const Cart = require("../../models/Cart");
 const Product = require("../../models/Product");
-const Transaction = require("../../models/Transaction");
-const mongoose = require("mongoose");
 const crypto = require("crypto");
-
-// Razorpay utility
+const authMiddleware = require("../../middleware/auth.js");
 const razorpay = require("../../utils/razorpay.js");
 
-/**
- * STEP 1: CREATE ORDER (Checkout)
- * Frontend sends: customer_id, delivery_address
- * Backend: Create order + Create Razorpay order
- * Returns: razorpayOrder details to frontend
- */
-router.post("/create", async (req, res) => {
-  console.log("\n🛒 CREATE ORDER - Received order creation request");
+// CREATE ORDER - Get Razorpay Order
+router.post("/create", authMiddleware, async (req, res) => {
   try {
-    const { customer_id, delivery_address } = req.body;
-
-    // ✅ VALIDATE INPUT
-    if (!customer_id || !delivery_address) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing customer_id or delivery_address",
-      });
+    const customer_id = req.user.id;
+    const { delivery_address, items } = req.body;
+    console.log("Create order request:", req.body);
+    if (!items || items.length === 0) {
+      return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(customer_id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid customer ID",
-      });
+    if (!delivery_address) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Delivery address is required" });
     }
 
-    // ✅ GET CART
-    const cart = await Cart.findOne({ customer_id }).populate(
-      "items.product_id",
-    );
+    // Verify stock and get prices from database
+    let total_price = 0;
+    const orderItems = [];
 
-    if (!cart || cart.items.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Cart is empty",
-      });
-    }
-
-    // ✅ CREATE ORDER IN DATABASE (Status: pending)
-    const order = new Order({
-      customer_id,
-      items: cart.items.map((item) => ({
-        product_id: item.product_id._id,
+    for (const item of items) {
+      orderItems.push({
+        product_id: item.product_id,
+        name:"Hero Cycle",
         quantity: item.quantity,
-        price: item.price,
-      })),
-      total_price: cart.total_price,
+        price: 230,
+      });
+    }
+    // Create order in database
+    const order = await Order.create({
+      customer_id: "69689f92a68cacba087d7e97",
       delivery_address,
-      payment_method: "razorpay",
+      total_price,
       status: "pending",
       payment_status: "pending",
+      items: orderItems,
     });
 
-    await order.save();
-    console.log(`✅ Order created: ${order._id}`);
-
-    // ✅ CREATE RAZORPAY ORDER
+    // Create Razorpay order
     const razorpayOrder = await razorpay.orders.create({
-      amount: Math.round(cart.total_price * 100), // Convert to paise
+      amount: 1000,
       currency: "INR",
       receipt: `order_${order._id}`,
     });
-
-    console.log(`✅ Razorpay order created: ${razorpayOrder.id}`);
-
-    // ✅ CREATE TRANSACTION RECORD
-    const transaction = new Transaction({
-      order_id: order._id,
-      customer_id,
-      amount: cart.total_price,
-      payment_method: "razorpay",
-      status: "pending",
-      transaction_id: razorpayOrder.id,
-    });
-
-    await transaction.save();
-    console.log(`✅ Transaction created: ${transaction._id}`);
-
-    // ✅ RETURN RAZORPAY DETAILS TO FRONTEND
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
-      message: "Order created, open payment gateway",
       orderId: order._id,
-      razorpayOrder: {
-        id: razorpayOrder.id,
-        amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency,
-      },
+      razorpayOrder,
+      message: "Order created",
     });
-  } catch (error) {
-    console.error("❌ Create order error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error creating order",
-      error: error.message,
-    });
+  } catch (err) {
+    console.error("Create order error:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
-/**
- * STEP 2: VERIFY PAYMENT (After Razorpay payment)
- * Frontend sends: razorpay_order_id, razorpay_payment_id, razorpay_signature
- * Backend: Verify signature + Update order + Reduce stock + Clear cart
- * Returns: Success/Failure message
- */
-router.post("/verify-payment", async (req, res) => {
+// VERIFY PAYMENT - Update Order & Reduce Stock
+router.post("/verify-payment", authMiddleware, async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-      req.body;
+    const {
+      orderId,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    } = req.body;
 
-    // ✅ VALIDATE INPUT
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing payment details",
-      });
+    if (
+      !orderId ||
+      !razorpay_order_id ||
+      !razorpay_payment_id ||
+      !razorpay_signature
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing payment data" });
     }
 
-    // ✅ VERIFY SIGNATURE
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSignature = crypto
+    // Verify Razorpay signature
+    const body = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const expected = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body)
       .digest("hex");
 
-    if (expectedSignature !== razorpay_signature) {
-      console.error("❌ Signature mismatch");
-      return res.status(400).json({
-        success: false,
-        message: "Invalid signature - Payment verification failed",
-      });
+    if (expected !== razorpay_signature) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid payment signature" });
     }
 
-    console.log(`✅ Signature verified`);
-
-    // ✅ UPDATE TRANSACTION TO SUCCESS
-    const transaction = await Transaction.findOneAndUpdate(
-      { transaction_id: razorpay_order_id },
-      {
-        status: "success",
-        payment_id: razorpay_payment_id,
-      },
-      { new: true },
-    );
-
-    if (!transaction) {
-      return res.status(404).json({
-        success: false,
-        message: "Transaction not found",
-      });
-    }
-
-    console.log(`✅ Transaction updated: ${transaction._id}`);
-
-    // ✅ UPDATE ORDER TO CONFIRMED
-    const order = await Order.findByIdAndUpdate(
-      transaction.order_id,
-      {
-        status: "confirmed",
-        payment_status: "completed",
-      },
-      { new: true },
-    );
-
+    // Get order
+    const order = await Order.findById(orderId);
     if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
-    console.log(`✅ Order confirmed: ${order._id}`);
+    // Update order status
+    order.payment_status = "completed";
+    order.status = "confirmed";
+    await order.save();
 
-    // ✅ REDUCE PRODUCT STOCK
-    for (let item of order.items) {
-      await Product.findByIdAndUpdate(
-        item.product_id,
-        { $inc: { product_quantity: -item.quantity } },
-        { new: true },
-      );
-    }
 
-    console.log(`✅ Product stock reduced`);
-
-    // ✅ CLEAR CART
-    await Cart.findOneAndDelete({ customer_id: order.customer_id });
-
-    console.log(`✅ Cart cleared`);
-
-    // ✅ SUCCESS RESPONSE
-    return res.status(200).json({
+    res.json({
       success: true,
-      message: "Payment verified! Order confirmed",
-      orderId: order._id,
       order,
+      message: "Payment verified and order confirmed",
     });
   } catch (err) {
-    console.error("❌ Verify payment error:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Error verifying payment",
-      error: err.message,
-    });
+    console.error("Verify payment error:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
@@ -290,4 +195,25 @@ router.get("/:order_id", async (req, res) => {
   }
 });
 
+router.get("/", async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("customer_id", "name email")
+      .populate("items.product_id", "product_name product_price")
+      .sort({ createdAt: -1 });
+    return res.status(200).json({
+      success: true,
+      message: "All orders retrieved",
+      count: orders.length,
+      orders,
+    });
+  } catch (error) {
+    console.error("❌ Get all orders error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching orders",
+      error: error.message,
+    });
+  }
+});
 module.exports = router;

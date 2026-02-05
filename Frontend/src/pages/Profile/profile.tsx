@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   User,
   Package,
@@ -14,6 +14,30 @@ import {
 } from "lucide-react";
 import { getProfile } from "../../services/profileService";
 import { logoutService } from "../../services/authService";
+import axios from "axios";
+interface Product {
+  _id: string;
+  product_name: string;
+  product_price: number;
+}
+
+interface OrderItem {
+  _id: string;
+  product_id: Product;
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  _id: string;
+  status: string;
+  payment_method: string;
+  payment_status: string;
+  total_price: number;
+  delivery_address: string;
+  items: OrderItem[];
+  createdAt: string;
+}
 
 function Profile() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -35,35 +59,22 @@ function Profile() {
   useEffect(() => {
     fetchUserProfile();
   }, []);
-  const orders = [
-    {
-      id: "#DM-2847",
-      date: "Jan 20, 2026",
-      status: "Delivered",
-      total: "$284.00",
-      items: 3,
-    },
-    {
-      id: "#DM-2846",
-      date: "Jan 15, 2026",
-      status: "In Transit",
-      total: "$156.50",
-      items: 2,
-    },
-    {
-      id: "#DM-2845",
-      date: "Jan 10, 2026",
-      status: "Delivered",
-      total: "$423.00",
-      items: 5,
-    },
-  ];
 
-  const wishlist = [
-    { id: 1, name: "Wireless Headphones", price: "$129.99", image: "🎧" },
-    { id: 2, name: "Smart Watch", price: "$299.99", image: "⌚" },
-    { id: 3, name: "Laptop Stand", price: "$49.99", image: "💻" },
-  ];
+const [orders, setOrders] = useState<Order[]>([]);
+const fetchOrders = async () => {
+  try {
+    const response = await axios.get("http://localhost:4000/orders");
+    setOrders(response.data.orders || []);
+    console.log(response.data.orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+  }
+};
+
+useEffect(() => {
+  fetchOrders();
+}, []);
+
 
   const menuItems = [
     { id: "overview", label: "Overview", icon: User },
@@ -72,23 +83,10 @@ function Profile() {
     { id: "addresses", label: "Addresses", icon: MapPin },
     { id: "payment", label: "Payment Methods", icon: CreditCard },
     { id: "settings", label: "Settings", icon: Settings },
-    { id: "logout", label: "Logout", icon: LogOut , onClick: handleLogout},
+    { id: "logout", label: "Logout", icon: LogOut, onClick: handleLogout },
   ];
 
-
-  const getStatusColor = (status:any) => {
-    switch (status) {
-      case "Delivered":
-        return "bg-green-100 text-green-700";
-      case "In Transit":
-        return "bg-blue-100 text-blue-700";
-      case "Processing":
-        return "bg-yellow-100 text-yellow-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
-
+ 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -119,7 +117,11 @@ function Profile() {
                   return (
                     <button
                       key={item.id}
-                      onClick={item.onClick ? item.onClick : () => setActiveTab(item.id)}
+                      onClick={
+                        item.onClick
+                          ? item.onClick
+                          : () => setActiveTab(item.id)
+                      }
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                         activeTab === item.id
                           ? "bg-linear-to-r from-blue-500 to-purple-600 text-white shadow-md"
@@ -148,7 +150,7 @@ function Profile() {
                         <p className="text-sm text-slate-500 mb-1">
                           Total Orders
                         </p>
-                        <p className="text-3xl font-bold text-slate-900">24</p>
+                        <p className="text-3xl font-bold text-slate-900">{orders.length}</p>
                       </div>
                       <ShoppingBag className="w-10 h-10 text-blue-500 opacity-20" />
                     </div>
@@ -172,59 +174,11 @@ function Profile() {
                         <p className="text-sm text-slate-500 mb-1">
                           Wishlist Items
                         </p>
-                        <p className="text-3xl font-bold text-slate-900">
-                          {wishlist.length}
+                        <p className="text-3xl font-bold text-slate-900">45
                         </p>
                       </div>
                       <Heart className="w-10 h-10 text-pink-500 opacity-20" />
                     </div>
-                  </div>
-                </div>
-
-                {/* Recent Orders */}
-                <div className="bg-white rounded-2xl shadow-sm p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-slate-900">
-                      Recent Orders
-                    </h3>
-                    <button
-                      onClick={() => setActiveTab("orders")}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                      View All
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    {orders.slice(0, 2).map((order) => (
-                      <div
-                        key={order.id}
-                        className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <Package className="w-6 h-6 text-white" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-900">
-                              {order.id}
-                            </p>
-                            <p className="text-sm text-slate-500">
-                              {order.date} • {order.items} items
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-slate-900">
-                            {order.total}
-                          </p>
-                          <span
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}
-                          >
-                            {order.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 </div>
 
@@ -264,41 +218,52 @@ function Profile() {
                   Order History
                 </h3>
                 <div className="space-y-4">
-                  {orders.map((order) => (
-                    <div
-                      key={order.id}
-                      className="border border-slate-200 rounded-xl p-5 hover:border-blue-300 transition-colors"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-start gap-4">
-                          <div className="w-14 h-14 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shrink-0">
-                            <Package className="w-7 h-7 text-white" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-900 mb-1">
-                              {order.id}
-                            </p>
-                            <p className="text-sm text-slate-500 mb-2">
-                              {order.date} • {order.items} items
-                            </p>
-                            <span
-                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}
+                  {orders.length === 0 ? (
+                    <p className="text-gray-500">No orders found</p>
+                  ) : (
+                    orders.map((order) => (
+                      <div
+                        key={order._id}
+                        className="border border-slate-200 rounded-xl p-5 hover:border-blue-300 transition-colors space-y-2"
+                      >
+                        <p>
+                          <span className="font-semibold">Order ID:</span>{" "}
+                          {order._id}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Status:</span>{" "}
+                          {order.status}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Payment:</span>{" "}
+                          {order.payment_method} ({order.payment_status})
+                        </p>
+                        <p>
+                          <span className="font-semibold">Total:</span> ₹
+                          {order.total_price}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Address:</span>{" "}
+                          {order.delivery_address}
+                        </p>
+
+                        <div className="mt-3">
+                          <p className="font-semibold mb-1">Items:</p>
+                          {order.items.map((item) => (
+                            <div
+                              key={item._id}
+                              className="flex justify-between text-sm text-gray-600"
                             >
-                              {order.status}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3 sm:flex-col sm:items-end">
-                          <p className="text-xl font-bold text-slate-900">
-                            {order.total}
-                          </p>
-                          <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium">
-                            View Details
-                          </button>
+                              {/* <span>{item.product_id.product_name}</span> */}
+                              <span>
+                                x{item.quantity} | ₹{item.price}
+                              </span>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             )}
@@ -310,34 +275,7 @@ function Profile() {
                   My Wishlist
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {wishlist.map((item) => (
-                    <div
-                      key={item.id}
-                      className="border border-slate-200 rounded-xl p-5 hover:border-pink-300 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-20 h-20 bg-slate-100 rounded-lg flex items-center justify-center text-4xl">
-                          {item.image}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-slate-900 mb-1">
-                            {item.name}
-                          </h4>
-                          <p className="text-lg font-bold text-blue-600 mb-2">
-                            {item.price}
-                          </p>
-                          <div className="flex gap-2">
-                            <button className="px-3 py-1 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm">
-                              Add to Cart
-                            </button>
-                            <button className="px-3 py-1 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-sm">
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  
                 </div>
               </div>
             )}

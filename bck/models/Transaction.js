@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const transactionSchema = new mongoose.Schema(
   {
-    _id: mongoose.Schema.Types.ObjectId,
     order_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
@@ -19,24 +18,36 @@ const transactionSchema = new mongoose.Schema(
     },
     payment_method: {
       type: String,
-      enum: ["card", "online"],
-      default: "card",
+      enum: ["card", "online", "razorpay", "upi", "netbanking", "wallet"],
+      default: "razorpay",
     },
     status: {
       type: String,
       enum: ["pending", "success", "failed"],
       default: "pending",
     },
+    razorpay_order_id: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    razorpay_payment_id: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    payment_id: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     transaction_id: {
       type: String,
       unique: true,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
+      sparse: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Transaction", transactionSchema);
