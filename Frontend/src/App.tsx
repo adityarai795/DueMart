@@ -9,6 +9,7 @@ import Profile from "./pages/Profile/profile";
 
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { CartProvider } from "./context/cartContext";
+import AllProducts from "./pages/Product/AllProducts";
 
 // Layout for main site
 const MainLayout = () => (
@@ -33,6 +34,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/order" element={<Order />} />
+            <Route path="/products" element={<AllProducts />} /> {/* Add this line for AllProducts page */}
           </Route>
         </Routes>
       </BrowserRouter>

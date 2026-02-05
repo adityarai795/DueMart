@@ -2,31 +2,18 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../../models/Product.js");
 const mongoose = require("mongoose");
-const { addProduct } = require("../../controller/productController.js");
+const {
+  addProduct,
+  bulkAddProducts,
+  getAllProducts,
+} = require("../../controller/productController.js");
 const authMiddleware = require("../../middleware/auth.js");
 
 // Add Product (by Shopkeeper)
 router.post("/add", authMiddleware, addProduct);
-
+router.post("/bulk-add", authMiddleware, bulkAddProducts);
 // Get All Productsa
-router.get("/", async (req, res) => {
-  try {
-    const products = await Product.find().populate(
-      "shopkeeper_id",
-      "name shopname"
-    );
-    res.status(200).json({
-      message: "Products retrieved successfully",
-      count: products.length,
-      products,
-    });
-  } catch (error) {
-    console.error("Get all products error:", error);
-    res
-      .status(500)
-      .json({ message: "Error fetching products", error: error.message });
-  }
-});
+router.get("/", getAllProducts);
 
 // Get Products by Category
 router.get("/category/:category", async (req, res) => {

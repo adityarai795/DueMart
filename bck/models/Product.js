@@ -36,6 +36,17 @@ const productSchema = new mongoose.Schema(
         "Sports",
         "Other",
         "Accessories",
+        "Furniture",
+        "Gaming",
+        "Footwear",
+        "Home & Kitchen",
+        "Health & Personal Care",
+        "Toys & Baby Products",
+        "Automotive",
+        "Smart Home",
+        "Wearables",
+        "Computer Accessories",
+        "Computer Components",
       ],
       default: "Other",
     },
@@ -58,7 +69,7 @@ const productSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Product", productSchema);
