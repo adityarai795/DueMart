@@ -1,20 +1,84 @@
+version: "3.8"
 
 services:
-  frontend:
-    container_name: duemart-frontend
-    build:
-      context: ./Frontend
-      dockerfile: Dockerfile
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: duemart-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-mongodb_password}
+      MONGO_INITDB_DATABASE: duemart
     ports:
-      - "5173:5173"
-    restart: always
-  
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - duemart-network
+    restart: unless-stopped
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
   backend:
     container_name: duemart-backend
     build:
       context: ./bck
       dockerfile: Dockerfile
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 4000
+      MONGODB_URI: mongodb://admin:${MONGO_PASSWORD:-mongodb_password}@mongodb:27017/duemart?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:-change_this_in_production}
+      JWT_EXPIRY: 24h
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 100
     ports:
       - "4000:4000"
-    restart: always
-    
+    networks:
+      - duemart-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Application
+  frontend:
+    container_name: duemart-frontend
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+        VITE_RAZORPAY_KEY: ${RAZORPAY_KEY_ID}
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+      VITE_RAZORPAY_KEY: ${RAZORPAY_KEY_ID}
+    ports:
+      - "5173:5173"
+    networks:
+      - duemart-network
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  duemart-network:
+    driver: bridge

@@ -2,9 +2,11 @@ import { api } from "./api";
 
 const productService = {
   // Fetch all products
-  getAllProducts: async () => {
+  getAllProducts: async ({ page, limit }: { page: number; limit: number }) => {
     try {
-      const response = await api.get("/products");
+      const response = await api.get("/products", {
+        params: { page, limit },
+      });
       return response.data;
     } catch (error: any) {
       throw new Error(

@@ -1,47 +1,84 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/authContext";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { signup, loading, error, clearError } = useAuth();
 
-  const [inputData, setInputData] = useState({
-    fullName: "",
+  const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    mobileno: "",
   });
+  const [localError, setLocalError] = useState("");
 
-  const handleChange = (e:any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setInputData((prev) => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+    setLocalError("");
+  };
+
+  const validateForm = (): string | null => {
+    if (!formData.name.trim()) return "Full name is required";
+    if (formData.name.trim().length < 2)
+      return "Full name must be at least 2 characters";
+
+    if (!formData.email.trim()) return "Email is required";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) return "Invalid email format";
+
+    if (!formData.password) return "Password is required";
+    if (formData.password.length < 6)
+      return "Password must be at least 6 characters";
+
+    if (!formData.confirmPassword) return "Please confirm your password";
+    if (formData.password !== formData.confirmPassword)
+      return "Passwords do not match";
+
+    if (!formData.mobileno.trim()) return "Mobile number is required";
+    if (!/^\d{10}$/.test(formData.mobileno.trim()))
+      return "Mobile number must be 10 digits";
+
+    return null;
   };
 
   const handleSubmit = async () => {
     try {
-      if (inputData.password !== inputData.confirmPassword) {
-        alert("Passwords do not match!");
+      clearError();
+      const validationError = validateForm();
+      if (validationError) {
+        setLocalError(validationError);
         return;
       }
 
-      // API Call Example:
-      // await signupService(inputData);
+      await signup(
+        formData.name,
+        formData.email,
+        formData.password,
+        formData.mobileno,
+      );
+      navigate("/");
+    } catch (err: any) {
+      setLocalError(err.message || "Signup failed");
+    }
+  };
 
-      alert("Signup successful!");
-      navigate("/login");
-    } catch (error) {
-      console.error("Signup failed:", error);
-      alert("Signup failed. Check console.");
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSubmit();
     }
   };
 
   return (
-    <div className="min-h-screen bg-white overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center px-6 py-10">
+    <div className="min-h-screen bg-white overflow-y-auto py-10">
+      <div className="flex items-center justify-center px-6">
         <div className="w-full max-w-md">
-          {/* Title */}
           <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
             Create Account on DueMart
           </h1>
@@ -49,64 +86,97 @@ const Signup = () => {
             Sign up to get started
           </p>
 
+          {/* Error Messages */}
+          {(localError || error) && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {localError || error}
+            </div>
+          )}
+
           {/* Full Name */}
           <div className="mb-4">
-            <label className="block text-gray-600 mb-1">Full Name</label>
+            <label className="block text-gray-600 mb-1">Full Name *</label>
             <input
               type="text"
-              name="fullName"
+              name="name"
               placeholder="Enter your full name"
-              value={inputData.fullName}
+              value={formData.name}
               onChange={handleChange}
+              onKeyPress={handleKeyPress}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+              disabled={loading}
             />
           </div>
 
           {/* Email */}
           <div className="mb-4">
-            <label className="block text-gray-600 mb-1">Email</label>
+            <label className="block text-gray-600 mb-1">Email *</label>
             <input
               type="email"
               name="email"
               placeholder="Enter your email"
-              value={inputData.email}
+              value={formData.email}
               onChange={handleChange}
+              onKeyPress={handleKeyPress}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+              disabled={loading}
+            />
+          </div>
+
+          {/* Mobile Number */}
+          <div className="mb-4">
+            <label className="block text-gray-600 mb-1">Mobile Number *</label>
+            <input
+              type="tel"
+              name="mobileno"
+              placeholder="Enter 10-digit mobile number"
+              value={formData.mobileno}
+              onChange={handleChange}
+              onKeyPress={handleKeyPress}
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+              disabled={loading}
             />
           </div>
 
           {/* Password */}
           <div className="mb-4">
-            <label className="block text-gray-600 mb-1">Password</label>
+            <label className="block text-gray-600 mb-1">Password *</label>
             <input
               type="password"
               name="password"
-              placeholder="Create a password"
-              value={inputData.password}
+              placeholder="Create a password (min 6 characters)"
+              value={formData.password}
               onChange={handleChange}
+              onKeyPress={handleKeyPress}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+              disabled={loading}
             />
           </div>
 
           {/* Confirm Password */}
           <div className="mb-6">
-            <label className="block text-gray-600 mb-1">Confirm Password</label>
+            <label className="block text-gray-600 mb-1">
+              Confirm Password *
+            </label>
             <input
               type="password"
               name="confirmPassword"
               placeholder="Confirm your password"
-              value={inputData.confirmPassword}
+              value={formData.confirmPassword}
               onChange={handleChange}
+              onKeyPress={handleKeyPress}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+              disabled={loading}
             />
           </div>
 
           {/* Sign Up Button */}
           <button
             onClick={handleSubmit}
-            className="w-full bg-green-600 py-4 rounded-xl mb-4 text-white font-semibold text-lg hover:bg-green-700 active:opacity-70 transition"
+            disabled={loading}
+            className="w-full bg-green-600 py-4 rounded-xl mb-4 text-white font-semibold text-lg hover:bg-green-700 active:opacity-70 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign Up
+            {loading ? "Signing up..." : "Sign Up"}
           </button>
 
           {/* Footer */}
@@ -115,6 +185,7 @@ const Signup = () => {
             <button
               onClick={() => navigate("/login")}
               className="text-blue-600 font-semibold hover:underline"
+              disabled={loading}
             >
               Login
             </button>

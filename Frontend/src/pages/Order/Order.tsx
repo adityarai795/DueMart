@@ -109,61 +109,69 @@ const Order = () => {
     }
   };
 
-  return (
-    <div className="order-container">
-      <h1>🛒 My Cart</h1>
+ return (
+   <div className="order-page">
+     <div className="order-wrapper">
+       <h1 className="page-title">Checkout</h1>
 
-      {error && <div className="alert alert-error">{error}</div>}
-      {message && <div className="alert alert-success">{message}</div>}
+       {error && <div className="alert error">{error}</div>}
+       {message && <div className="alert success">{message}</div>}
 
-      {cartItems.length === 0 ? (
-        <div className="empty-cart">
-          <p>Your cart is empty. Start shopping!</p>
-        </div>
-      ) : (
-        <>
-          <div className="cart-items">
-            {cartItems.map((item: any) => (
-              <div key={item.id} className="cart-item">
-                <div className="item-details">
-                  <h3>{item.name}</h3>
-                  <p>Price: ₹{item.price.toFixed(2)}</p>
-                </div>
-                <div className="item-quantity">
-                  <span>Qty: {item.quantity}</span>
-                </div>
-                <div className="item-total">
-                  <span>₹{(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+       {cartItems.length === 0 ? (
+         <div className="empty-cart">
+           <p>Your cart is empty 🛒</p>
+         </div>
+       ) : (
+         <div className="checkout-layout">
+           {/* LEFT */}
+           <div className="cart-section">
+             <h2>Order Summary</h2>
 
-          <div className="delivery-section">
-            <h3>Delivery Address</h3>
-            <textarea
-              value={deliveryAddress}
-              onChange={(e) => setDeliveryAddress(e.target.value)}
-              placeholder="Enter your delivery address..."
-              rows={4}
-            />
-          </div>
+             {cartItems.map((item: any) => (
+               <div key={item.id} className="cart-card">
+                 <div>
+                   <h4>{item.name}</h4>
+                   <p>
+                     ₹{item.price.toFixed(2)} × {item.quantity}
+                   </p>
+                 </div>
 
-          <div className="order-footer">
-            <h2>Total: ₹{totalPrice.toFixed(2)}</h2>
+                 <div className="item-price">
+                   ₹{(item.price * item.quantity).toFixed(2)}
+                 </div>
+               </div>
+             ))}
+           </div>
 
-            <button
-              onClick={handleCheckout}
-              disabled={loading || cartItems.length === 0}
-              className="checkout-btn"
-            >
-              {loading ? "Processing..." : "💳 Checkout & Pay"}
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
+           {/* RIGHT */}
+           <div className="payment-section">
+             <h2>Delivery Details</h2>
+
+             <textarea
+               value={deliveryAddress}
+               onChange={(e) => setDeliveryAddress(e.target.value)}
+               placeholder="Enter full delivery address"
+             />
+
+             <div className="price-box">
+               <span>Total Amount</span>
+               <strong>₹{totalPrice.toFixed(2)}</strong>
+             </div>
+
+             <button
+               onClick={handleCheckout}
+               disabled={loading}
+               className="pay-btn"
+             >
+               {loading ? "Processing..." : "Pay with Razorpay"}
+             </button>
+           </div>
+         </div>
+       )}
+     </div>
+   </div>
+ );
+
 };
 
 export default Order;

@@ -1,4 +1,4 @@
-import {  useState } from "react";
+import { useState } from "react";
 import {
   ShoppingCart,
   Search,
@@ -9,21 +9,23 @@ import {
   MapPin,
   Phone,
   Mail,
+  LogOut,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/cartContext";
+import { useAuth } from "../context/authContext";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cartItems } = useCart();
+  const { isAuthenticated, customer, logout } = useAuth();
+  const navigate = useNavigate();
 
-  // function toggleMenu() {
-  //   console.log("Toggling menu");
-  //   setIsMenuOpen(!isMenuOpen);
-  // }
-  // useEffect(() => {
-  //   toggleMenu();
-  // }, [isMenuOpen]);
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
+
   return (
     <div>
       <div className="bg-gray-900 text-white text-sm">
@@ -43,6 +45,9 @@ function Navbar() {
               <MapPin className="w-3 h-3" />
               Track Order
             </span>
+            {isAuthenticated && customer && (
+              <span className="ml-4 text-sm">Welcome, {customer.name}!</span>
+            )}
           </div>
         </div>
       </div>
@@ -76,10 +81,13 @@ function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-6">
+              <Link to="/wishlist">
               <button className="flex items-center gap-2 hover:text-blue-600 transition">
                 <Heart className="w-5 h-5" />
+                
                 <span>Wishlist</span>
-              </button>
+                </button>
+              </Link>
               <Link to="/order">
                 <button className="flex items-center gap-2 hover:text-blue-600 transition relative">
                   <ShoppingCart className="w-5 h-5" />
@@ -91,12 +99,38 @@ function Navbar() {
                   )}
                 </button>
               </Link>
-              <Link to="/profile">
-                <button className="flex items-center gap-2 hover:text-blue-600 transition">
-                  <User className="w-5 h-5" />
-                  <span>Account</span>
-                </button>
-              </Link>
+
+              {isAuthenticated ? (
+                <>
+                  <Link to="/profile">
+                    <button className="flex items-center gap-2 hover:text-blue-600 transition">
+                      <User className="w-5 h-5" />
+                      <span>Account</span>
+                    </button>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 text-red-600 hover:text-red-800 transition"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <button className="flex items-center gap-2 hover:text-blue-600 transition">
+                      <User className="w-5 h-5" />
+                      <span>Login</span>
+                    </button>
+                  </Link>
+                  <Link to="/signup">
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                      Sign Up
+                    </button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -173,12 +207,41 @@ function Navbar() {
                   <a href="#" className="flex items-center gap-2 py-2">
                     <Heart className="w-5 h-5" /> Wishlist
                   </a>
-                  <a href="#" className="flex items-center gap-2 py-2">
-                    <ShoppingCart className="w-5 h-5" /> Cart 
-                  </a>
-                  <a href="#" className="flex items-center gap-2 py-2">
-                    <User className="w-5 h-5" /> Account
-                  </a>
+                  <Link to="/order" className="flex items-center gap-2 py-2">
+                    <ShoppingCart className="w-5 h-5" /> Cart{" "}
+                    {cartItems.length > 0 && `(${cartItems.length})`}
+                  </Link>
+                  {isAuthenticated ? (
+                    <>
+                      <Link
+                        to="/profile"
+                        className="flex items-center gap-2 py-2"
+                      >
+                        <User className="w-5 h-5" /> Account
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 py-2 text-red-600 w-full"
+                      >
+                        <LogOut className="w-5 h-5" /> Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/login"
+                        className="flex items-center gap-2 py-2"
+                      >
+                        <User className="w-5 h-5" /> Login
+                      </Link>
+                      <Link
+                        to="/signup"
+                        className="block py-2 px-4 bg-blue-600 text-white rounded"
+                      >
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

@@ -31,10 +31,10 @@ export const orderService = {
     }
   },
 
-  // Get customer orders
-  getCustomerOrders: async (customerId: string) => {
+  // Get customer orders (protected - uses auth token)
+  getCustomerOrders: async () => {
     try {
-      const response = await api.get(`/orders/customer/${customerId}`);
+      const response = await api.get("/orders/customer");
       return response.data;
     } catch (error: any) {
       throw new Error(

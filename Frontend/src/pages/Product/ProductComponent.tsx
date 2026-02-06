@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { ArrowRight, ShoppingCart } from "lucide-react";
+import { ArrowRight,  ShoppingCart } from "lucide-react";
 import { productService } from "../../services/productService";
 import { useCart } from "../../context/cartContext";
-import Category from "../../components/Category";
-
+import { Link } from "react-router-dom";
 interface Product {
   _id: string;
   product_name: string;
@@ -12,17 +11,16 @@ interface Product {
   image_url: string;
 }
 
-const AllProducts = () => {
+const ProductComponent = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addToCart } = useCart();
   const [addedItems, setAddedItems] = useState<Set<string>>(new Set());
-  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await productService.getAllProducts({ page, limit: 12 });
+        const res = await productService.getAllProducts({ page: 1, limit: 8 });
         setProducts(res.products);
       } catch (error) {
         console.error("Failed to fetch products", error);
@@ -32,13 +30,12 @@ const AllProducts = () => {
     };
 
     fetchProducts();
-  }, [page]);
+  }, []);
 
   if (isLoading) return <div className="text-center py-10">Loading...</div>;
 
   return (
-    <section className="container mx-auto px-6  bg-white">
-      <Category />
+    <section className="container mx-auto px-6 py-16 bg-white">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800">
@@ -47,6 +44,12 @@ const AllProducts = () => {
             ({products.length})
           </span>
         </h2>
+
+        <Link to="/products">
+        <button className="text-blue-600 font-semibold hover:text-blue-700 flex items-center gap-2">
+          View All <ArrowRight className="w-5 h-5" />
+          </button>
+          </Link>
       </div>
 
       {/* Product Grid */}
@@ -78,7 +81,7 @@ const AllProducts = () => {
                   ₹{product.product_price.toLocaleString()}
                 </span>
 
-                <button 
+                <button
                   onClick={() => {
                     addToCart({
                       id: product._id,
@@ -87,9 +90,9 @@ const AllProducts = () => {
                       description: product.product_description,
                       image: product.image_url,
                     });
-                    setAddedItems(prev => new Set(prev).add(product._id));
+                    setAddedItems((prev) => new Set(prev).add(product._id));
                     setTimeout(() => {
-                      setAddedItems(prev => {
+                      setAddedItems((prev) => {
                         const newSet = new Set(prev);
                         newSet.delete(product._id);
                         return newSet;
@@ -98,30 +101,20 @@ const AllProducts = () => {
                   }}
                   className={`${
                     addedItems.has(product._id)
-                      ? 'bg-green-600 hover:bg-green-700'
-                      : 'bg-blue-600 hover:bg-blue-700'
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-blue-600 hover:bg-blue-700"
                   } text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2`}
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  {addedItems.has(product._id) ? 'Added ✓' : 'Add to Cart'}
+                  {addedItems.has(product._id) ? "Added ✓" : "Add to Cart"}
                 </button>
               </div>
             </div>
           </div>
         ))}
       </div>
-
-      <div>
-        <button
-          onClick={() => setPage(prev => prev + 1)}
-          className="mt-8 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Load More
-        </button>
-       
-      </div>
     </section>
   );
 };
 
-export default AllProducts;
+export default ProductComponent;
