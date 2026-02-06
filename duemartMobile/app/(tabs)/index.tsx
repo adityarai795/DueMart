@@ -6,10 +6,12 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
+import AllProduct from "@/src/pages/AllProduct";
 
-const API_URL = "http://192.168.1.35:4000/products";
+const API_URL = "http://192.168.1.41:4000/products";
 
 const DuemartHomePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -128,9 +130,15 @@ const DuemartHomePage = () => {
 
       {/* PRODUCTS */}
       <View className="px-6 py-4 pb-10">
-        <Text className="text-xl font-bold text-gray-800 mb-4">
-          All Products
-        </Text>
+        <View className="flex-row justify-between items-center mb-4">
+          <Text className="text-xl font-bold text-gray-800 mb-4">
+            All Products
+          </Text>
+          <Text className="text-blue-600" onPress={() => {
+            Alert.alert("View All", "Redirecting to all products page");
+            <AllProduct />
+          }}>View all</Text>
+        </View>
 
         {/* LOADING */}
         {loading && <ActivityIndicator size="large" color="#2563EB" />}
@@ -142,7 +150,7 @@ const DuemartHomePage = () => {
 
         {/* PRODUCTS GRID */}
         <View className="flex-row flex-wrap justify-between">
-          {filteredProducts.map((product:any) => {
+          {filteredProducts.map((product: any) => {
             const inStock = product.product_quantity > 0;
             const lowStock =
               product.product_quantity > 0 && product.product_quantity < 5;

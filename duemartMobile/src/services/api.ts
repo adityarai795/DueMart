@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BASE_URL =
-  Platform.OS === "web" ? "http://localhost:4000" : "http://192.168.1.35:4000"; // your PC IP for mobile
+  Platform.OS === "web" ? "http://localhost:4000" : "http://192.168.1.41:4000"; // your PC IP for mobile
 
 export const api = axios.create({
   baseURL: BASE_URL,

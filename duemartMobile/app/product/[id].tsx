@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { addToCartService } from "@/src/redux/actions/cartAction";
 
 // 🌐 API
-const API_BASE = "http://192.168.1.35:4000/products";
+const API_BASE = "http://192.168.1.41:4000/products";
 
 // 🖼️ Dummy Image (Online placeholder)
 const DUMMY_IMAGE =
